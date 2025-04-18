@@ -41,7 +41,7 @@ scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/au
 creds_dict = st.secrets["google_service_account"]
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
-sheet = client.open("Leads").worksheet("Leads")
+sheet = client.open("Leads_Generador_VSL").worksheet("Leads")
 fecha = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 sheet.append_row([nombre, email, fecha])
 
