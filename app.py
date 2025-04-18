@@ -93,7 +93,7 @@ def generar_docx(texto):
     return doc_path
 
 # --- Función para generar el audio ElevenLabs ---
-def generar_audio(texto):
+def generar_audio(texto, nombre, email):
     client = ElevenLabs(api_key=st.secrets["ELEVEN_API_KEY"])
     audio = client.generate(
         text=texto,
@@ -115,7 +115,7 @@ if st.button("🚀 Generar VSL PDF + Audio"):
         st.warning("⚠️ Por favor, introduce un texto válido.")
     else:
         docx_path = generar_docx(guion)
-        audio_path = generar_audio(guion)
+        audio_path = generar_audio(guion, nombre, email)
 
         with open(docx_path, "rb") as f:
             st.download_button("📄 Descargar guión en DOCX", f, file_name="VSL_Metodox3.docx")
