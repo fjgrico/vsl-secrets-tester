@@ -28,14 +28,24 @@ with st.sidebar:
 
 st.title("🧠 Generador VSL PRO - Mentor Digital Pro")
 
-# --- Formulario para captación de leads ---
-st.subheader("📩 Antes de comenzar, déjanos tus datos")
-nombre = st.text_input("Tu nombre")
-email = st.text_input("Tu email")
+# --- Captura de datos del usuario con persistencia ---
+if "nombre" not in st.session_state:
+    st.session_state.nombre = ""
+if "email" not in st.session_state:
+    st.session_state.email = ""
 
-if not nombre or not email:
-    st.warning("⚠️ Rellena tu nombre y email antes de continuar.")
-    st.stop()
+if not st.session_state.nombre or not st.session_state.email:
+    st.subheader("📩 Antes de comenzar, déjanos tus datos")
+    st.session_state.nombre = st.text_input("Tu nombre")
+    st.session_state.email = st.text_input("Tu email")
+
+    if not st.session_state.nombre or not st.session_state.email:
+        st.warning("⚠️ Rellena tu nombre y email y pulsa Enter para continuar.")
+        st.stop()
+
+# --- Variables desde sesión ---
+nombre = st.session_state.nombre
+email = st.session_state.email
 
 # --- Guardar en Google Sheets ---
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
