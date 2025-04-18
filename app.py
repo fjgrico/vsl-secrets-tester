@@ -1,12 +1,8 @@
-# 📦 Interfaz web Streamlit para generar guiones VSL + audio con branding
-
 import streamlit as st
 from docx import Document
 from docx.shared import Pt, Inches
-from docx.enum.text import WD_ALIGN_PARAGRAPH
 from elevenlabs.client import ElevenLabs
 from elevenlabs import Voice, VoiceSettings
-import base64
 import datetime
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -28,7 +24,7 @@ with st.sidebar:
 
 st.title("🧠 Generador VSL PRO - Mentor Digital Pro")
 
-# --- Captura de datos del usuario con persistencia ---
+# --- Captura persistente de datos ---
 if "nombre" not in st.session_state:
     st.session_state.nombre = ""
 if "email" not in st.session_state:
@@ -42,8 +38,10 @@ if not st.session_state.nombre or not st.session_state.email:
     if not st.session_state.nombre or not st.session_state.email:
         st.warning("⚠️ Rellena tu nombre y email y pulsa Enter para continuar.")
         st.stop()
+    elif "@" not in st.session_state.email or "." not in st.session_state.email:
+        st.warning("⚠️ Introduce un email válido.")
+        st.stop()
 
-# --- Variables desde sesión ---
 nombre = st.session_state.nombre
 email = st.session_state.email
 
@@ -65,7 +63,6 @@ headers = {
 }
 
 try:
-    # Paso 1: crear contacto
     r1 = requests.post("https://mentordigitalpro.api-us1.com/api/3/contacts", headers=headers, json={
         "contact": {
             "email": email,
@@ -75,7 +72,6 @@ try:
     r1.raise_for_status()
     contact_id = r1.json()["contact"]["id"]
 
-    # Paso 2: añadirlo a la lista
     r2 = requests.post("https://mentordigitalpro.api-us1.com/api/3/contactLists", headers=headers, json={
         "contactList": {
             "list": AC_LIST_ID,
@@ -96,7 +92,6 @@ font_title = "Playfair Display"
 font_body = "Open Sans"
 color_primary = "#C7A16A"
 
-# --- Función para generar el DOCX ---
 def generar_docx(texto):
     doc = Document()
     doc.add_picture("logo.png", width=Inches(2))
@@ -108,11 +103,10 @@ def generar_docx(texto):
     doc.save(doc_path)
     return doc_path
 
-# --- Función para generar el audio ElevenLabs ---
 def generar_audio(texto, nombre, email):
-st.subheader("🧪 Test de secretos")
-st.write("🔑 ¿Clave encontrada?:", "ELEVEN_API_KEY" in st.secrets)
-st.write("📋 Claves disponibles:", list(st.secrets.keys()))
+    if "ELEVEN_API_KEY" not in st.secrets:
+        st.error("❌ No se encontró la clave ELEVEN_API_KEY en los secrets. Revisa tu configuración.")
+        st.stop()
 
     client = ElevenLabs(api_key=st.secrets["ELEVEN_API_KEY"])
     audio = client.generate(
@@ -129,7 +123,6 @@ st.write("📋 Claves disponibles:", list(st.secrets.keys()))
             f.write(chunk)
     return file_path
 
-# --- Botón para generar ---
 if st.button("🚀 Generar VSL PDF + Audio"):
     if guion.strip() == "":
         st.warning("⚠️ Por favor, introduce un texto válido.")
