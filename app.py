@@ -11,6 +11,7 @@ import datetime
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import requests
+import json
 
 # --- Configuración de la página ---
 st.set_page_config(page_title="Generador VSL PRO - Mentor Digital Pro", page_icon="🧠")
@@ -45,31 +46,35 @@ sheet = client.open("Leads_Generador_VSL").worksheet("Leads")
 fecha = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 sheet.append_row([nombre, email, fecha])
 
-# --- Guardar en ActiveCampaign ---
+# --- Guardar en ActiveCampaign (2 pasos) ---
 AC_API_KEY = "01029a7b514cdc25538ea826866e885b8fbb9871142f5b12d8f6ab43b0e7067b27092614"
-AC_API_URL = "https://mentordigitalpro.api-us1.com/api/3/contacts"
 AC_LIST_ID = 13
-
 headers = {
     "Api-Token": AC_API_KEY,
     "Content-Type": "application/json"
 }
 
-payload = {
-    "contact": {
-        "email": email,
-        "firstName": nombre,
-        "phone": "",
-        "fieldValues": [],
-        "lists": [
-            {"list": AC_LIST_ID, "status": 1}
-        ]
-    }
-}
-
 try:
-    r = requests.post(AC_API_URL, headers=headers, json=payload)
-    r.raise_for_status()
+    # Paso 1: crear contacto
+    r1 = requests.post("https://mentordigitalpro.api-us1.com/api/3/contacts", headers=headers, json={
+        "contact": {
+            "email": email,
+            "firstName": nombre
+        }
+    })
+    r1.raise_for_status()
+    contact_id = r1.json()["contact"]["id"]
+
+    # Paso 2: añadirlo a la lista
+    r2 = requests.post("https://mentordigitalpro.api-us1.com/api/3/contactLists", headers=headers, json={
+        "contactList": {
+            "list": AC_LIST_ID,
+            "contact": contact_id,
+            "status": 1
+        }
+    })
+    r2.raise_for_status()
+
 except Exception as e:
     st.warning(f"⚠️ No se pudo guardar en ActiveCampaign: {e}")
 
