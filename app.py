@@ -38,7 +38,8 @@ if not nombre or not email:
 
 # --- Guardar en Google Sheets ---
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("generador-vsl-7900e0b9af9c.json", scope)
+creds_dict = st.secrets["google_service_account"]
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
 sheet = client.open("Leads").worksheet("Leads")
 fecha = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
