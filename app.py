@@ -61,7 +61,7 @@ payload = {
         "phone": "",
         "fieldValues": [],
         "lists": [
-            {"list": AC_LIST_ID, "status": 1}  # 1 = active
+            {"list": AC_LIST_ID, "status": 1}
         ]
     }
 }
