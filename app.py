@@ -110,6 +110,10 @@ def generar_docx(texto):
 
 # --- Función para generar el audio ElevenLabs ---
 def generar_audio(texto, nombre, email):
+st.subheader("🧪 Test de secretos")
+st.write("🔑 ¿Clave encontrada?:", "ELEVEN_API_KEY" in st.secrets)
+st.write("📋 Claves disponibles:", list(st.secrets.keys()))
+
     client = ElevenLabs(api_key=st.secrets["ELEVEN_API_KEY"])
     audio = client.generate(
         text=texto,
